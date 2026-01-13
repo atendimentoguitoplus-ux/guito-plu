@@ -223,6 +223,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onLogout, onUp
     }
     try {
       const { created_at, ...data } = clientForm as any;
+      // Trata ID vazio para evitar erro UUID
+      if (!isEditing && data.id === "") delete data.id;
+
       const { error } = isEditing 
         ? await supabase.from('clients').update(data).eq('id', clientForm.id)
         : await supabase.from('clients').insert([data]);
@@ -242,6 +245,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onLogout, onUp
     }
     try {
       const { created_at, ...data } = contentForm as any;
+      // Trata ID vazio para evitar erro UUID
+      if (!isEditing && data.id === "") delete data.id;
+
       const { error } = isEditing 
         ? await supabase.from('content').update(data).eq('id', contentForm.id)
         : await supabase.from('content').insert([data]);
@@ -261,6 +267,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onLogout, onUp
     }
     try {
       const { created_at, ...data } = planForm as any;
+      // Trata ID vazio para evitar erro UUID
+      if (!isEditing && data.id === "") delete data.id;
+
       const { error } = isEditing 
         ? await supabase.from('plans').update(data).eq('id', planForm.id)
         : await supabase.from('plans').insert([data]);
@@ -273,10 +282,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onLogout, onUp
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const finalData = { ...notificationForm, created_at: new Date().toISOString() };
+    
+    // Converte ID de usuário vazio para null para evitar erro de sintaxe UUID
+    const finalData = { 
+      ...notificationForm, 
+      target_user_id: notificationForm.target_user_id === "" ? null : notificationForm.target_user_id,
+      created_at: new Date().toISOString() 
+    };
     
     if (!isProduction) {
-      setNotifications(prev => [{ ...finalData, id: Math.random().toString() }, ...prev]);
+      setNotifications(prev => [{ ...finalData, id: Math.random().toString() } as Notification, ...prev]);
       setShowNotificationModal(false);
       setIsSubmitting(false);
       return;
