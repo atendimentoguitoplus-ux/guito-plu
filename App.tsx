@@ -13,7 +13,7 @@ import AdminLogin from './components/AdminLogin';
 import { supabase, isProduction } from './supabaseClient';
 import { ContentItem, Plan, AppSettings } from './types';
 import { RELEASES, CARTOONS, PLANS } from './constants';
-import { Loader2, Tv, Sparkles, Film } from 'lucide-react';
+import { Loader2, Tv, Sparkles } from 'lucide-react';
 
 const App: React.FC = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
@@ -142,8 +142,12 @@ const App: React.FC = () => {
     );
   }
 
-  const releases = content.filter(item => item.category !== 'cartoon');
-  const cartoons = content.filter(item => item.category === 'cartoon');
+  // Filtramos apenas o conteúdo público (não exclusivo para assinantes) para a home
+  const releases = content.filter(item => item.category !== 'cartoon' && !item.is_subscriber_only);
+  const cartoons = content.filter(item => item.category === 'cartoon' && !item.is_subscriber_only);
+  
+  // No painel do cliente passamos todos os conteúdos ou apenas os relevantes
+  const allReleasesForClient = content.filter(item => item.category !== 'cartoon');
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-red-600 selection:text-white overflow-x-hidden">
@@ -167,7 +171,7 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-2 text-red-500 font-bold uppercase tracking-[0.2em] text-[10px]">
                   <Sparkles size={14} /> Estreias da Semana
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">Lançamentos <span className="text-red-600">VIP</span></h2>
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-left">Lançamentos <span className="text-red-600">Públicos</span></h2>
               </div>
             </div>
 
@@ -182,7 +186,7 @@ const App: React.FC = () => {
                 {releases.map((item) => (
                   <ContentCard key={item.id} item={item} onClick={setSelectedContent} />
                 ))}
-                {releases.length === 0 && <p className="text-gray-500 col-span-full py-10 text-center font-bold uppercase tracking-widest text-xs">Nenhum título disponível no momento.</p>}
+                {releases.length === 0 && <p className="text-gray-500 col-span-full py-10 text-center font-bold uppercase tracking-widest text-xs">Nenhum título público disponível.</p>}
               </div>
             )}
           </div>
@@ -196,7 +200,7 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-2 text-blue-500 font-bold uppercase tracking-[0.2em] text-[10px]">
                   <Tv size={14} /> Diversão em Família
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">Mundo <span className="text-blue-500">Kids</span></h2>
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-left">Mundo <span className="text-blue-500">Kids</span></h2>
               </div>
             </div>
 
@@ -218,7 +222,7 @@ const App: React.FC = () => {
       {isClientAreaOpen && user && (
         <ClientArea 
           user={user} 
-          releases={releases} 
+          releases={allReleasesForClient} 
           referralDays={settings.referral_reward_days}
           onLogout={handleLogout} 
           onClose={() => setIsClientAreaOpen(false)} 

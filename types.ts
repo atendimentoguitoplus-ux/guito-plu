@@ -7,13 +7,14 @@ export interface ContentItem {
   rating: number;
   year: string;
   is_new: boolean;
+  is_subscriber_only?: boolean;
   created_at?: string;
   synopsis?: string;
   movie_cast?: string[];
 }
 
 export interface Plan {
-  id: string;
+  id?: string; // Tornado opcional para criação de novos planos
   name: string;
   price: string;
   features: string[];
@@ -28,7 +29,7 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'alert' | 'promo';
-  target_user_id?: string; // Se vazio, envia para todos
+  target_user_id?: string;
   is_read?: boolean;
   created_at?: string;
 }
@@ -39,9 +40,13 @@ export interface AppSettings {
   trial_hours: number;
 }
 
-export interface ContactFormData {
+export interface UserData {
+  id: string;
   name: string;
   email: string;
-  phone: string;
-  message: string;
+  plan: string;
+  expiry: string;
+  status?: 'active' | 'inactive';
+  renewal_link?: string;
+  custom_banner_url?: string;
 }
